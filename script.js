@@ -4,17 +4,17 @@ async function getInfo() {
   const weatherEl = document.getElementById("weather");
 
   try {
-    // Get time from WorldTimeAPI
-    const timeRes = await fetch(`https://worldtimeapi.org/api/timezone/${country}`);
-    if (!timeRes.ok) throw new Error("Time API failed");
-    const timeData = await timeRes.json();
-    timeEl.innerText = "Time: " + new Date(timeData.datetime).toLocaleTimeString();
+    // ✅ Local time using Intl API
+    const now = new Date();
+    const options = { timeZone: country, hour: '2-digit', minute: '2-digit', second: '2-digit' };
+    const formatter = new Intl.DateTimeFormat([], options);
+    timeEl.innerText = "Time: " + formatter.format(now);
   } catch (err) {
     console.error("Time error:", err);
     timeEl.innerText = "Time: unavailable";
   }
 
-  // Coordinates for weather (demo cities)
+  // ✅ Weather from Open-Meteo
   let coords = {
     "Asia/Kolkata": {lat: 19.076, lon: 72.877}, // Mumbai
     "America/New_York": {lat: 40.7128, lon: -74.0060},
@@ -28,7 +28,6 @@ async function getInfo() {
     const weatherRes = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
     );
-    if (!weatherRes.ok) throw new Error("Weather API failed");
     const weatherData = await weatherRes.json();
     weatherEl.innerText =
       "Weather: " +

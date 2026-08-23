@@ -7,23 +7,44 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🌍 World Time & Weather</h1>
-  <p>Select a country to see its current time and weather:</p>
+  <!-- Header -->
+  <header>
+    <div class="logo">🌍 World Info</div>
+    <nav>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#">Countries</a></li>
+        <li><a href="#">Weather</a></li>
+        <li><a href="#">About</a></li>
+      </ul>
+    </nav>
+  </header>
 
-  <select id="countrySelect">
-    <option value="Asia/Kolkata">India</option>
-    <option value="America/New_York">USA</option>
-    <option value="Europe/London">UK</option>
-    <option value="Asia/Tokyo">Japan</option>
-    <option value="Australia/Sydney">Australia</option>
-  </select>
-  <button onclick="getInfo()">Show Info</button>
+  <!-- Main content -->
+  <main>
+    <h1>World Time & Weather</h1>
+    <p>Select a country to see its current time and weather:</p>
 
-  <div class="info-box" id="infoBox">
-    <h2>Country Info</h2>
-    <p id="time">Time: --</p>
-    <p id="weather">Weather: --</p>
-  </div>
+    <select id="countrySelect">
+      <option value="Asia/Kolkata">India</option>
+      <option value="America/New_York">USA</option>
+      <option value="Europe/London">UK</option>
+      <option value="Asia/Tokyo">Japan</option>
+      <option value="Australia/Sydney">Australia</option>
+    </select>
+    <button onclick="getInfo()">Show Info</button>
+
+    <div class="info-box" id="infoBox">
+      <h2>Country Info</h2>
+      <p id="time">Time: --</p>
+      <p id="weather">Weather: --</p>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 World Info | Designed by Bhavesh</p>
+  </footer>
 
   <script src="script.js"></script>
 </body>

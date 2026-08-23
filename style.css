@@ -1,8 +1,51 @@
+/* General */
 body {
   font-family: Arial, sans-serif;
   background: #f4f4f9;
+  margin: 0;
+  padding: 0;
   text-align: center;
-  padding: 50px;
+}
+
+/* Header */
+header {
+  background: #0077b6;
+  color: #fff;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .logo {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+header nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+header nav ul li {
+  margin-left: 20px;
+}
+
+header nav ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+header nav ul li a:hover {
+  text-decoration: underline;
+}
+
+/* Main content */
+main {
+  padding: 40px;
 }
 
 select, button {
@@ -23,4 +66,14 @@ select, button {
 
 h2 {
   color: #333;
+}
+
+/* Footer */
+footer {
+  background: #0077b6;
+  color: #fff;
+  padding: 15px;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 }
