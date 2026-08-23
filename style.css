@@ -9,7 +9,7 @@ body {
 
 /* Header */
 header {
-  background: #0077b6;
+  background: #010101;
   color: #fff;
   padding: 15px 30px;
   display: flex;
@@ -70,10 +70,11 @@ h2 {
 
 /* Footer */
 footer {
-  background: #0077b6;
+  background: #0a0a0a;
   color: #fff;
   padding: 15px;
   position: fixed;
   bottom: 0;
   width: 100%;
 }
+
