@@ -12,7 +12,7 @@
     <div class="logo">🌍 World Info</div>
     <nav>
       <ul>
-        <li><a href="index.html">Home</a></li>
+        <li><a class="active" href="index.html">Home</a></li>
         <li><a href="countries.html">Countries</a></li>
         <li><a href="weather.html">Weather</a></li>
         <li><a href="about.html">About</a></li>
@@ -22,22 +22,22 @@
 
   <!-- Main content -->
   <main>
-    <h1>World Time & Weather</h1>
-    <p>Select a country to see its current time and weather:</p>
+    <section class="intro">
+      <p class="eyebrow">Live around the world</p>
+      <h1>Know the moment, anywhere.</h1>
+      <p>Track local time and current conditions in a handful of world cities.</p>
+    </section>
 
-    <select id="countrySelect">
-      <option value="Asia/Kolkata">India</option>
-      <option value="America/New_York">USA</option>
-      <option value="Europe/London">UK</option>
-      <option value="Asia/Tokyo">Japan</option>
-      <option value="Australia/Sydney">Australia</option>
-    </select>
-    <button onclick="getInfo()">Show Info</button>
-
-    <div class="info-box" id="infoBox">
-      <h2>Country Info</h2>
-      <p id="time">Time: --</p>
-      <p id="weather">Weather: --</p>
+    <section class="dashboard" aria-labelledby="dashboard-title">
+      <div class="dashboard-heading"><div><p class="eyebrow">Your world clock</p><h2 id="dashboard-title">Choose a city</h2></div><span class="live-dot">Live</span></div>
+      <div class="controls"><label for="countrySelect">Location</label><select id="countrySelect"></select><button id="showInfo" type="button">Refresh weather</button></div>
+      <div class="info-box" id="infoBox">
+        <p id="date" class="date">Loading date...</p>
+        <p id="time" class="time" aria-live="polite">--:--:--</p>
+        <p id="weather" class="weather" aria-live="polite">Weather: loading...</p>
+        <div id="weatherDetails" class="weather-details"></div>
+      </div>
+      <p id="status" class="status" aria-live="polite">Preparing live data...</p>
     </div>
   </main>
 

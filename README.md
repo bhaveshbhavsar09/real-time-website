@@ -4,10 +4,12 @@ A simple real-time website built using HTML, CSS, and JavaScript.
 
 ## 🚀 Features
 
-- Responsive website design
-- Clean and modern user interface
-- Interactive elements using JavaScript
-- Real-time website functionality
+- Responsive live dashboard for time and weather
+- Current temperature, feels-like temperature, wind, and humidity
+- Automatic clock updates with timezone-aware dates
+- Search-free city selection with saved preference
+- Loading and connection error feedback
+- Countries page with direct weather links
 
 ## 🛠️ Technologies Used
 
@@ -21,5 +23,9 @@ A simple real-time website built using HTML, CSS, and JavaScript.
 real-time-website/
 ├── index.html
 ├── style.css
+├── countries.html
+├── weather.html
+├── about.html
 ├── script.js
+├── style.css
 └── README.md

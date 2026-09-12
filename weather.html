@@ -13,19 +13,35 @@
       <ul>
         <li><a href="index.html">Home</a></li>
         <li><a href="countries.html">Countries</a></li>
-        <li><a href="weather.html">Weather</a></li>
+        <li><a class="active" href="weather.html">Weather</a></li>
         <li><a href="about.html">About</a></li>
       </ul>
     </nav>
   </header>
 
   <main>
-    <h1>Weather</h1>
-    <p>Check real-time weather updates for different countries.</p>
+    <section class="intro compact-intro">
+      <p class="eyebrow">Live conditions</p>
+      <h1>Weather, without the guesswork.</h1>
+      <p>Current conditions, wind, humidity, and local time for cities around the world.</p>
+    </section>
+
+    <section class="dashboard weather-dashboard" aria-labelledby="weather-title">
+      <div class="dashboard-heading"><div><p class="eyebrow">Open-Meteo forecast</p><h2 id="weather-title">Select a location</h2></div><span class="live-dot">Live</span></div>
+      <div class="controls"><label for="countrySelect">Location</label><select id="countrySelect"></select><button id="showInfo" type="button">Refresh weather</button></div>
+      <div class="info-box">
+        <p id="date" class="date">Loading date...</p>
+        <p id="time" class="time" aria-live="polite">--:--:--</p>
+        <p id="weather" class="weather" aria-live="polite">Weather: loading...</p>
+        <div id="weatherDetails" class="weather-details"></div>
+      </div>
+      <p id="status" class="status" aria-live="polite">Preparing live data...</p>
+    </section>
   </main>
 
   <footer>
     <p>&copy; 2026 World Info | Designed by Bhavesh</p>
   </footer>
+  <script src="script.js"></script>
 </body>
 </html>

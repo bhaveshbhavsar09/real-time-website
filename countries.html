@@ -12,7 +12,7 @@
     <nav>
       <ul>
         <li><a href="index.html">Home</a></li>
-        <li><a href="countries.html">Countries</a></li>
+        <li><a class="active" href="countries.html">Countries</a></li>
         <li><a href="weather.html">Weather</a></li>
         <li><a href="about.html">About</a></li>
       </ul>
@@ -20,12 +20,20 @@
   </header>
 
   <main>
-    <h1>Countries</h1>
-    <p>Here you can explore different countries and their details.</p>
+    <section class="intro compact-intro">
+      <p class="eyebrow">Five places, one view</p>
+      <h1>Explore the world clock.</h1>
+      <p>Choose a city to see its live local time and current weather.</p>
+    </section>
+    <section aria-labelledby="locations-title">
+      <h2 id="locations-title" class="section-title">Featured locations</h2>
+      <div id="countryGrid" class="country-grid"></div>
+    </section>
   </main>
 
   <footer>
     <p>&copy; 2026 World Info | Designed by Bhavesh</p>
   </footer>
+  <script src="script.js"></script>
 </body>
 </html>
