@@ -7,8 +7,10 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
   <header>
     <div class="logo">🌍 World Info</div>
+
     <nav>
       <ul>
         <li><a href="index.html">Home</a></li>
@@ -20,20 +22,42 @@
   </header>
 
   <main>
+
     <section class="intro compact-intro">
-      <p class="eyebrow">Five places, one view</p>
+      <p class="eyebrow">195 countries, one view</p>
+
       <h1>Explore the world clock.</h1>
-      <p>Choose a city to see its live local time and current weather.</p>
+
+      <p>
+        Explore countries around the world and see their local time
+        and current weather.
+      </p>
     </section>
+
     <section aria-labelledby="locations-title">
-      <h2 id="locations-title" class="section-title">Featured locations</h2>
+
+      <h2 id="locations-title" class="section-title">
+        All Countries
+      </h2>
+
+      <div class="country-search">
+        <label for="countrySearch">Search countries</label>
+        <input id="countrySearch" type="search" placeholder="Search by country, capital, or code" autocomplete="off">
+        <p id="searchStatus" class="search-status" aria-live="polite"></p>
+      </div>
+
+      <!-- All 195 country cards will be inserted here by script.js -->
       <div id="countryGrid" class="country-grid"></div>
+
     </section>
+
   </main>
 
   <footer>
     <p>&copy; 2026 World Info | Designed by Bhavesh</p>
   </footer>
+
   <script src="script.js"></script>
+
 </body>
 </html>
