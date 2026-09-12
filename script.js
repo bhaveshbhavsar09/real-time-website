@@ -1,20 +1,30 @@
-async function getInfo() {
-  const country = document.getElementById("countrySelect").value;
+let clockTimer;
+
+function updateTime(timeZone) {
   const timeEl = document.getElementById("time");
-  const weatherEl = document.getElementById("weather");
 
   try {
-    // ✅ Local time using Intl API
-    const now = new Date();
-    const options = { timeZone: country, hour: '2-digit', minute: '2-digit', second: '2-digit' };
-    const formatter = new Intl.DateTimeFormat([], options);
-    timeEl.innerText = "Time: " + formatter.format(now);
+    const formatter = new Intl.DateTimeFormat([], {
+      timeZone,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+    timeEl.innerText = "Time: " + formatter.format(new Date());
   } catch (err) {
     console.error("Time error:", err);
     timeEl.innerText = "Time: unavailable";
   }
+}
 
-  // ✅ Weather from Open-Meteo
+async function getInfo() {
+  const country = document.getElementById("countrySelect").value;
+  const weatherEl = document.getElementById("weather");
+
+  clearInterval(clockTimer);
+  updateTime(country);
+  clockTimer = setInterval(() => updateTime(country), 1000);
+
   let coords = {
     "Asia/Kolkata": {lat: 19.076, lon: 72.877}, // Mumbai
     "America/New_York": {lat: 40.7128, lon: -74.0060},
@@ -38,3 +48,5 @@ async function getInfo() {
     weatherEl.innerText = "Weather: unavailable";
   }
 }
+
+document.getElementById("countrySelect").addEventListener("change", getInfo);
