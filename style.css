@@ -8,6 +8,19 @@
   --coral-dark: #bb4638;
   --mint: #d7eee4;
   --shadow: 0 18px 45px rgba(21, 35, 41, 0.1);
+  --transition: all 0.3s ease;
+}
+
+[data-theme="dark"] {
+  --ink: #f5f2eb;
+  --muted: #a3adb2;
+  --paper: #0f171a;
+  --panel: #1b282d;
+  --line: #2d3c42;
+  --coral: #ff7b68;
+  --coral-dark: #e86452;
+  --mint: #223c34;
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
 }
 
 * { box-sizing: border-box; }
@@ -17,7 +30,8 @@ body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: 'Inter', Arial, sans-serif;
+  transition: var(--transition);
 }
 
 header {
@@ -96,4 +110,90 @@ footer p { margin: 0; }
   .weather-details { flex-direction: column; gap: 8px; }
 }
 
+/* NEW STYLES */
+.theme-toggle {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 1.2rem;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 0;
+}
+.theme-toggle:hover {
+  background: var(--line);
+}
 
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.time-diff {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin: 0;
+  font-weight: 600;
+}
+
+.map-section {
+  margin-top: 60px;
+}
+.world-map {
+  height: 400px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  z-index: 1; /* Keep map behind dropdowns */
+}
+
+/* Skeleton Loaders */
+.hidden { display: none !important; }
+
+.skeleton-loader {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.skeleton-line {
+  background: linear-gradient(90deg, var(--line) 25%, var(--panel) 50%, var(--line) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.date-skeleton { width: 150px; height: 16px; margin-bottom: 8px; }
+.time-skeleton { width: 250px; height: 80px; margin-bottom: 10px; }
+.weather-skeleton { width: 200px; height: 24px; margin-bottom: 24px; }
+
+.skeleton-boxes {
+  display: flex;
+  gap: 30px;
+}
+.skeleton-box {
+  width: 100px;
+  height: 40px;
+  background: linear-gradient(90deg, var(--line) 25%, var(--panel) 50%, var(--line) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.info-box {
+  transition: background-color 0.5s ease;
+}

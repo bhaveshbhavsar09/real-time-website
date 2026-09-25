@@ -276,45 +276,47 @@ function updateTime(location) {
 // WEATHER
 // ============================================================
 
-function weatherDescription(code) {
+function weatherDescription(code, isDay = 1) {
   const descriptions = {
-    0: "Clear sky",
-    1: "Mainly clear",
-    2: "Partly cloudy",
-    3: "Overcast",
-    45: "Foggy",
-    48: "Freezing fog",
-    51: "Light drizzle",
-    53: "Drizzle",
-    55: "Heavy drizzle",
-    56: "Freezing drizzle",
-    57: "Heavy freezing drizzle",
-    61: "Light rain",
-    63: "Rain",
-    65: "Heavy rain",
-    66: "Freezing rain",
-    67: "Heavy freezing rain",
-    71: "Light snow",
-    73: "Snow",
-    75: "Heavy snow",
-    77: "Snow grains",
-    80: "Rain showers",
-    81: "Rain showers",
-    82: "Heavy rain showers",
-    85: "Snow showers",
-    86: "Heavy snow showers",
-    95: "Thunderstorm",
-    96: "Thunderstorm with hail",
-    99: "Thunderstorm with heavy hail"
+    0: isDay ? ["Clear sky", "☀️"] : ["Clear sky", "🌙"],
+    1: isDay ? ["Mainly clear", "🌤️"] : ["Mainly clear", "☁️"],
+    2: ["Partly cloudy", "⛅"],
+    3: ["Overcast", "☁️"],
+    45: ["Foggy", "🌫️"],
+    48: ["Freezing fog", "🌫️❄️"],
+    51: ["Light drizzle", "🌧️"],
+    53: ["Drizzle", "🌧️"],
+    55: ["Heavy drizzle", "🌧️"],
+    56: ["Freezing drizzle", "🌧️❄️"],
+    57: ["Heavy freezing drizzle", "🌧️❄️"],
+    61: ["Light rain", "🌦️"],
+    63: ["Rain", "🌧️"],
+    65: ["Heavy rain", "🌧️"],
+    66: ["Freezing rain", "🌧️❄️"],
+    67: ["Heavy freezing rain", "🌧️❄️"],
+    71: ["Light snow", "🌨️"],
+    73: ["Snow", "❄️"],
+    75: ["Heavy snow", "❄️"],
+    77: ["Snow grains", "❄️"],
+    80: ["Rain showers", "🌦️"],
+    81: ["Rain showers", "🌧️"],
+    82: ["Heavy rain showers", "⛈️"],
+    85: ["Snow showers", "🌨️"],
+    86: ["Heavy snow showers", "❄️"],
+    95: ["Thunderstorm", "🌩️"],
+    96: ["Thunderstorm with hail", "⛈️"],
+    99: ["Thunderstorm with heavy hail", "⛈️"]
   };
 
-  return descriptions[code] || "Conditions unavailable";
+  return descriptions[code] || ["Conditions unavailable", "❓"];
 }
 
 
 function setLoading(isLoading) {
   const button = document.getElementById("showInfo");
   const status = document.getElementById("status");
+  const skeleton = document.getElementById("skeletonLoader");
+  const content = document.getElementById("weatherContent");
 
   if (button) {
     button.disabled = isLoading;
@@ -325,6 +327,16 @@ function setLoading(isLoading) {
 
   if (status && isLoading) {
     status.textContent = "Fetching the latest weather...";
+  }
+
+  if (skeleton && content) {
+    if (isLoading) {
+      skeleton.classList.remove("hidden");
+      content.classList.add("hidden");
+    } else {
+      skeleton.classList.add("hidden");
+      content.classList.remove("hidden");
+    }
   }
 }
 
@@ -362,7 +374,8 @@ async function getInfo() {
       `https://api.open-meteo.com/v1/forecast` +
       `?latitude=${location.lat}` +
       `&longitude=${location.lon}` +
-      `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m` +
+      `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day` +
+      `&daily=sunrise,sunset` +
       `&timezone=auto`;
 
     const weatherRes = await fetch(url);
@@ -374,17 +387,39 @@ async function getInfo() {
     const weatherData = await weatherRes.json();
 
     const current = weatherData.current;
+    const daily = weatherData.daily;
     const units = weatherData.current_units;
 
-    const description =
-      weatherDescription(current.weather_code);
+    const [description, icon] =
+      weatherDescription(current.weather_code, current.is_day);
 
     weatherEl.textContent =
-      `${description} · ` +
+      `${icon} ${description} · ` +
       `${Math.round(current.temperature_2m)}` +
       `${units.temperature_2m}`;
+      
+    // Dynamic background based on time of day
+    const infoBox = document.getElementById('infoBox');
+    if (infoBox) {
+        if (current.is_day === 0) {
+            infoBox.style.backgroundColor = 'var(--panel)';
+            infoBox.style.color = 'var(--ink)';
+            infoBox.style.borderLeftColor = 'var(--muted)';
+        } else {
+            infoBox.style.backgroundColor = 'var(--mint)';
+            infoBox.style.color = '';
+            infoBox.style.borderLeftColor = 'var(--coral)';
+        }
+    }
 
     if (details) {
+      let sunriseStr = "--:--";
+      let sunsetStr = "--:--";
+      if (daily && daily.sunrise && daily.sunrise[0]) {
+          sunriseStr = new Date(daily.sunrise[0]).toLocaleTimeString([], {timeZone: location.timezone, hour: '2-digit', minute:'2-digit'});
+          sunsetStr = new Date(daily.sunset[0]).toLocaleTimeString([], {timeZone: location.timezone, hour: '2-digit', minute:'2-digit'});
+      }
+
       details.innerHTML = `
         <span>
           Feels like
@@ -409,6 +444,16 @@ async function getInfo() {
             ${units.relative_humidity_2m}
           </strong>
         </span>
+        
+        <span>
+          Sunrise
+          <strong>${sunriseStr}</strong>
+        </span>
+        
+        <span>
+          Sunset
+          <strong>${sunsetStr}</strong>
+        </span>
       `;
     }
 
@@ -416,6 +461,10 @@ async function getInfo() {
       status.textContent =
         `Updated just now for ${location.city}.`;
     }
+    
+    // Call new UI update functions
+    if (typeof updateTimeDiff === 'function') updateTimeDiff(location);
+    if (typeof initMap === 'function') initMap(location.lat, location.lon);
 
   } catch (error) {
     console.error("Weather error:", error);
@@ -574,4 +623,63 @@ if (locations.length !== 195) {
   console.warn(
     `Expected 195 countries but found ${locations.length}.`
   );
+}
+
+// ============================================================
+// NEW ENHANCEMENTS: DARK MODE, MAP, AND TIME DIFF
+// ============================================================
+
+// Theme Toggle
+const themeToggle = document.getElementById('themeToggle');
+const savedTheme = localStorage.getItem('theme') || 'light';
+if (savedTheme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+
+if (themeToggle) {
+  themeToggle.querySelector('.theme-icon').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+  themeToggle.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    themeToggle.querySelector('.theme-icon').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+  });
+}
+
+// Map Logic
+let map;
+let marker;
+
+function initMap(lat, lon) {
+  const mapEl = document.getElementById('map');
+  if (!mapEl || typeof L === 'undefined') return;
+  
+  if (!map) {
+    map = L.map('map').setView([lat, lon], 4);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 18
+    }).addTo(map);
+    marker = L.marker([lat, lon]).addTo(map);
+  } else {
+    map.flyTo([lat, lon], 5);
+    marker.setLatLng([lat, lon]);
+  }
+}
+
+// Time Difference
+function updateTimeDiff(location) {
+  const diffEl = document.getElementById('timeDiff');
+  if (!diffEl) return;
+
+  const localNow = new Date();
+  const targetStr = localNow.toLocaleString('en-US', {timeZone: location.timezone});
+  const localStr = localNow.toLocaleString('en-US');
+  const targetTime = new Date(targetStr).getTime();
+  const localTime = new Date(localStr).getTime();
+  
+  const diffHours = Math.round((targetTime - localTime) / 3600000);
+  
+  if (diffHours === 0) diffEl.textContent = "Same as local time";
+  else if (diffHours > 0) diffEl.textContent = `${diffHours} hour${diffHours > 1 ? 's' : ''} ahead of local time`;
+  else diffEl.textContent = `${Math.abs(diffHours)} hour${Math.abs(diffHours) > 1 ? 's' : ''} behind local time`;
 }
