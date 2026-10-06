@@ -375,7 +375,7 @@ async function getInfo() {
       `?latitude=${location.lat}` +
       `&longitude=${location.lon}` +
       `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m,is_day` +
-      `&daily=sunrise,sunset` +
+      `&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset` +
       `&timezone=auto`;
 
     const weatherRes = await fetch(url);
@@ -465,6 +465,13 @@ async function getInfo() {
     // Call new UI update functions
     if (typeof updateTimeDiff === 'function') updateTimeDiff(location);
     if (typeof initMap === 'function') initMap(location.lat, location.lon);
+    
+    // Extra Features
+    renderForecast(daily, location.timezone);
+    fetchAQI(location.lat, location.lon);
+    fetchCurrency(location.code);
+    fetchNews(location.code);
+    updateFavoriteBtn(location.code);
 
   } catch (error) {
     console.error("Weather error:", error);
@@ -660,6 +667,26 @@ function initMap(lat, lon) {
       maxZoom: 18
     }).addTo(map);
     marker = L.marker([lat, lon]).addTo(map);
+    
+    // Clickable Map feature
+    map.on('click', function(e) {
+      const clickedLat = e.latlng.lat;
+      const clickedLon = e.latlng.lng;
+      // Find closest city in our list
+      let closest = locations[0];
+      let minDistance = Infinity;
+      locations.forEach(loc => {
+        const dLat = loc.lat - clickedLat;
+        const dLon = loc.lon - clickedLon;
+        const dist = dLat*dLat + dLon*dLon;
+        if(dist < minDistance) {
+          minDistance = dist;
+          closest = loc;
+        }
+      });
+      document.getElementById("countrySelect").value = closest.timezone;
+      getInfo();
+    });
   } else {
     map.flyTo([lat, lon], 5);
     marker.setLatLng([lat, lon]);
@@ -683,3 +710,198 @@ function updateTimeDiff(location) {
   else if (diffHours > 0) diffEl.textContent = `${diffHours} hour${diffHours > 1 ? 's' : ''} ahead of local time`;
   else diffEl.textContent = `${Math.abs(diffHours)} hour${Math.abs(diffHours) > 1 ? 's' : ''} behind local time`;
 }
+
+// ============================================================
+// NEW EXTRA FEATURES
+// ============================================================
+
+// 1. 7-Day Forecast
+function renderForecast(daily, timezone) {
+  const container = document.getElementById('forecastContent');
+  if(!container || !daily) return;
+  
+  let html = '';
+  for(let i=0; i<daily.time.length; i++) {
+    const date = new Date(daily.time[i]);
+    const dayName = new Intl.DateTimeFormat('en-US', {weekday: 'short', timeZone: timezone}).format(date);
+    const [, icon] = weatherDescription(daily.weather_code[i], 1);
+    const max = Math.round(daily.temperature_2m_max[i]);
+    const min = Math.round(daily.temperature_2m_min[i]);
+    
+    html += `
+      <div class="forecast-day">
+        <span class="day-name">${i === 0 ? 'Today' : dayName}</span>
+        <span class="day-icon">${icon}</span>
+        <span>${max}° / ${min}°</span>
+      </div>
+    `;
+  }
+  container.innerHTML = html;
+}
+
+// 2. Air Quality Index
+async function fetchAQI(lat, lon) {
+  const container = document.getElementById('aqiContent');
+  if(!container) return;
+  container.innerHTML = 'Loading AQI...';
+  try {
+    const res = await fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi`);
+    const data = await res.json();
+    const aqi = data.current.us_aqi;
+    let color = '#3caa79'; // Good
+    let text = 'Good';
+    if(aqi > 50) { color = '#f5da4e'; text = 'Moderate'; }
+    if(aqi > 100) { color = '#e86452'; text = 'Unhealthy'; }
+    if(aqi > 200) { color = '#7e3073'; text = 'Very Unhealthy'; }
+    
+    container.innerHTML = `
+      <span class="aqi-value">${aqi}</span>
+      <span class="aqi-badge" style="background:${color}">${text}</span>
+    `;
+  } catch(e) {
+    container.innerHTML = 'AQI unavailable';
+  }
+}
+
+// 3. Currency Info
+async function fetchCurrency(countryCode) {
+  const container = document.getElementById('currencyContent');
+  if(!container) return;
+  container.innerHTML = 'Loading currency...';
+  try {
+    const res = await fetch(`https://restcountries.com/v3.1/alpha/${countryCode}`);
+    const data = await res.json();
+    const currencies = data[0].currencies;
+    const currencyCode = Object.keys(currencies)[0];
+    const currencyName = currencies[currencyCode].name;
+    const symbol = currencies[currencyCode].symbol;
+    
+    // Fetch rate
+    const rateRes = await fetch(`https://open.er-api.com/v6/latest/USD`);
+    const rateData = await rateRes.json();
+    const rate = rateData.rates[currencyCode];
+    
+    if(rate) {
+      container.innerHTML = `<strong>${currencyName} (${currencyCode})</strong><br>1 USD = ${rate.toFixed(2)} ${symbol || currencyCode}`;
+    } else {
+      container.innerHTML = `<strong>${currencyName} (${currencyCode})</strong>`;
+    }
+  } catch(e) {
+    container.innerHTML = 'Currency info unavailable';
+  }
+}
+
+// 4. Local News
+async function fetchNews(countryCode) {
+  const container = document.getElementById('newsContent');
+  if(!container) return;
+  container.innerHTML = 'Loading news...';
+  try {
+    // Note: This proxy only supports ~54 countries, so some might fail.
+    const res = await fetch(`https://saurav.tech/NewsAPI/top-headlines/category/general/${countryCode.toLowerCase()}.json`);
+    if(!res.ok) throw new Error('Not supported');
+    const data = await res.json();
+    const articles = data.articles.slice(0, 3);
+    if(articles.length === 0) throw new Error('No news');
+    
+    let html = '<ul>';
+    articles.forEach(a => {
+      html += `<li><a href="${a.url}" target="_blank" rel="noopener noreferrer">${a.title}</a></li>`;
+    });
+    html += '</ul>';
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = 'No news available for this region.';
+  }
+}
+
+// 5. Locate Me
+const locateBtn = document.getElementById('locateMe');
+if(locateBtn) {
+  locateBtn.addEventListener('click', () => {
+    locateBtn.textContent = '📍 Locating...';
+    navigator.geolocation.getCurrentPosition(pos => {
+      locateBtn.textContent = '📍 Locate Me';
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      
+      let closest = locations[0];
+      let minDistance = Infinity;
+      locations.forEach(loc => {
+        const dLat = loc.lat - lat;
+        const dLon = loc.lon - lon;
+        const dist = dLat*dLat + dLon*dLon;
+        if(dist < minDistance) {
+          minDistance = dist;
+          closest = loc;
+        }
+      });
+      document.getElementById("countrySelect").value = closest.timezone;
+      getInfo();
+    }, () => {
+      locateBtn.textContent = '📍 Location Denied';
+      setTimeout(() => { locateBtn.textContent = '📍 Locate Me'; }, 3000);
+    });
+  });
+}
+
+// 6. Favorites System
+const favBtn = document.getElementById('favoriteBtn');
+function getFavorites() {
+  return JSON.parse(localStorage.getItem('worldInfoFavorites') || '[]');
+}
+function saveFavorites(favs) {
+  localStorage.setItem('worldInfoFavorites', JSON.stringify(favs));
+}
+function updateFavoriteBtn(countryCode) {
+  if(!favBtn) return;
+  const favs = getFavorites();
+  if(favs.includes(countryCode)) {
+    favBtn.classList.add('active');
+    favBtn.textContent = '⭐ Saved';
+  } else {
+    favBtn.classList.remove('active');
+    favBtn.textContent = '⭐ Favorite';
+  }
+}
+if(favBtn) {
+  favBtn.addEventListener('click', () => {
+    const currentCode = locations.find(l => l.timezone === document.getElementById("countrySelect").value).code;
+    let favs = getFavorites();
+    if(favs.includes(currentCode)) {
+      favs = favs.filter(c => c !== currentCode);
+    } else {
+      favs.push(currentCode);
+    }
+    saveFavorites(favs);
+    updateFavoriteBtn(currentCode);
+    renderFavoritesDashboard();
+  });
+}
+
+function renderFavoritesDashboard() {
+  const grid = document.getElementById('favoritesGrid');
+  if(!grid) return;
+  const favs = getFavorites();
+  if(favs.length === 0) {
+    grid.innerHTML = '<p class="status">No favorites added yet.</p>';
+    return;
+  }
+  
+  const favLocations = locations.filter(l => favs.includes(l.code));
+  grid.innerHTML = favLocations.map(location => `
+      <article class="country-card" style="min-height: auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="country-flag" aria-hidden="true" style="font-size: 1.5rem;">${location.flag}</span>
+          <button onclick="document.getElementById('countrySelect').value='${location.timezone}'; getInfo(); window.scrollTo({top:0, behavior:'smooth'});" style="min-height: 30px; font-size: 0.8rem; padding: 0 10px;">View</button>
+        </div>
+        <div>
+          <h3 style="margin: 10px 0 0; font-size: 1.1rem;">${location.city}</h3>
+          <p>${location.country}</p>
+        </div>
+      </article>
+    `).join("");
+}
+
+// Render favorites on load
+document.addEventListener('DOMContentLoaded', renderFavoritesDashboard);

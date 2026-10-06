@@ -46,7 +46,13 @@
           <p id="timeDiff" class="time-diff"></p>
         </div>
       </div>
-      <div class="controls"><label for="countrySelect">Location</label><select id="countrySelect"></select><button id="showInfo" type="button">Refresh weather</button></div>
+      <div class="controls">
+        <label for="countrySelect">Location</label>
+        <select id="countrySelect"></select>
+        <button id="showInfo" type="button">Refresh weather</button>
+        <button id="locateMe" type="button" aria-label="Locate me">📍 Locate Me</button>
+        <button id="favoriteBtn" type="button" aria-label="Add to favorites">⭐</button>
+      </div>
       <div class="info-box" id="infoBox">
         <div id="skeletonLoader" class="skeleton-loader hidden">
           <div class="skeleton-line date-skeleton"></div>
@@ -64,7 +70,42 @@
         </div>
       </div>
       <p id="status" class="status" aria-live="polite">Preparing live data...</p>
-    </div>
+    </section>
+
+    <!-- Extra Features Grid -->
+    <section class="extra-features-grid" aria-label="Extra Location Data">
+      <!-- 7-Day Forecast -->
+      <div class="feature-card" id="forecastCard">
+        <h3>7-Day Forecast</h3>
+        <div id="forecastContent" class="forecast-content">Loading forecast...</div>
+      </div>
+      
+      <!-- Air Quality -->
+      <div class="feature-card" id="aqiCard">
+        <h3>Air Quality Index</h3>
+        <div id="aqiContent" class="aqi-content">Loading AQI...</div>
+      </div>
+      
+      <!-- Currency -->
+      <div class="feature-card" id="currencyCard">
+        <h3>Currency Exchange</h3>
+        <div id="currencyContent" class="currency-content">Loading currency...</div>
+      </div>
+
+      <!-- Local News -->
+      <div class="feature-card" id="newsCard">
+        <h3>Top Headlines</h3>
+        <div id="newsContent" class="news-content">Loading news...</div>
+      </div>
+    </section>
+
+    <!-- Favorites Dashboard -->
+    <section class="favorites-section">
+      <h2 class="section-title">My Favorite Cities</h2>
+      <div id="favoritesGrid" class="country-grid">
+        <p class="status">No favorites added yet.</p>
+      </div>
+    </section>
 
     <!-- Map Section -->
     <section class="map-section">
