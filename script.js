@@ -215,6 +215,41 @@ const locations = countries.map(
   })
 );
 
+const statesData = {
+  "IN": [
+    { name: "Maharashtra", lat: 19.0760, lon: 72.8777, timezone: "Asia/Kolkata" },
+    { name: "Delhi", lat: 28.6139, lon: 77.2090, timezone: "Asia/Kolkata" },
+    { name: "Karnataka", lat: 12.9716, lon: 77.5946, timezone: "Asia/Kolkata" },
+    { name: "Tamil Nadu", lat: 13.0827, lon: 80.2707, timezone: "Asia/Kolkata" },
+    { name: "West Bengal", lat: 22.5726, lon: 88.3639, timezone: "Asia/Kolkata" },
+    { name: "Gujarat", lat: 23.0225, lon: 72.5714, timezone: "Asia/Kolkata" }
+  ],
+  "US": [
+    { name: "New York", lat: 40.7128, lon: -74.0060, timezone: "America/New_York" },
+    { name: "California", lat: 34.0522, lon: -118.2437, timezone: "America/Los_Angeles" },
+    { name: "Texas", lat: 29.7604, lon: -95.3698, timezone: "America/Chicago" },
+    { name: "Florida", lat: 25.7617, lon: -80.1918, timezone: "America/New_York" },
+    { name: "Illinois", lat: 41.8781, lon: -87.6298, timezone: "America/Chicago" }
+  ],
+  "AU": [
+    { name: "New South Wales", lat: -33.8688, lon: 151.2093, timezone: "Australia/Sydney" },
+    { name: "Victoria", lat: -37.8136, lon: 144.9631, timezone: "Australia/Melbourne" },
+    { name: "Queensland", lat: -27.4698, lon: 153.0251, timezone: "Australia/Brisbane" },
+    { name: "Western Australia", lat: -31.9505, lon: 115.8605, timezone: "Australia/Perth" }
+  ],
+  "CA": [
+    { name: "Ontario", lat: 43.6510, lon: -79.3470, timezone: "America/Toronto" },
+    { name: "Quebec", lat: 45.5017, lon: -73.5673, timezone: "America/Toronto" },
+    { name: "British Columbia", lat: 49.2827, lon: -123.1207, timezone: "America/Vancouver" },
+    { name: "Alberta", lat: 51.0447, lon: -114.0719, timezone: "America/Edmonton" }
+  ],
+  "GB": [
+    { name: "England", lat: 52.3555, lon: -1.1743, timezone: "Europe/London" },
+    { name: "Scotland", lat: 56.4907, lon: -4.2026, timezone: "Europe/London" },
+    { name: "Wales", lat: 52.1307, lon: -3.7837, timezone: "Europe/London" },
+    { name: "Northern Ireland", lat: 54.7877, lon: -6.4923, timezone: "Europe/London" }
+  ]
+};
 
 // ============================================================
 // CLOCK
@@ -349,7 +384,14 @@ async function getInfo() {
 
   if (!select || !weatherEl) return;
 
-  const location = getLocation(select.value);
+  let location = getLocation(select.value);
+  const stateSelect = document.getElementById("stateSelect");
+  if (stateSelect && stateSelect.value && !stateSelect.classList.contains("hidden")) {
+     const stateData = statesData[location.code]?.find(s => s.name === stateSelect.value);
+     if (stateData) {
+        location = { ...location, ...stateData, city: stateData.name };
+     }
+  }
 
   localStorage.setItem(
     "worldInfoTimezone",
@@ -496,8 +538,28 @@ async function getInfo() {
 
 
 // ============================================================
-// COUNTRY SELECTOR
+// COUNTRY & STATE SELECTOR
 // ============================================================
+
+function updateStateDropdown() {
+  const select = document.getElementById("countrySelect");
+  const stateSelect = document.getElementById("stateSelect");
+  if (!select || !stateSelect) return;
+  
+  const location = getLocation(select.value);
+  const states = statesData[location.code];
+  
+  if (states && states.length > 0) {
+    stateSelect.innerHTML = `<option value="">-- Select State/Province --</option>` + 
+      states.map(s => `<option value="${s.name}">${s.name}</option>`).join("");
+    stateSelect.classList.remove("hidden");
+    stateSelect.style.display = "inline-block";
+  } else {
+    stateSelect.innerHTML = "";
+    stateSelect.classList.add("hidden");
+    stateSelect.style.display = "none";
+  }
+}
 
 function populateLocations() {
   const select =
@@ -527,8 +589,18 @@ function populateLocations() {
 
   select.addEventListener(
     "change",
-    getInfo
+    () => {
+      updateStateDropdown();
+      getInfo();
+    }
   );
+
+  const stateSelect = document.getElementById("stateSelect");
+  if (stateSelect) {
+    stateSelect.addEventListener("change", getInfo);
+  }
+
+  updateStateDropdown();
 
   const refreshButton =
     document.getElementById("showInfo");
@@ -684,7 +756,9 @@ function initMap(lat, lon) {
           closest = loc;
         }
       });
-      document.getElementById("countrySelect").value = closest.timezone;
+      const sel = document.getElementById("countrySelect");
+      sel.value = closest.timezone;
+      if (typeof updateStateDropdown === 'function') updateStateDropdown();
       getInfo();
     });
   } else {
@@ -836,7 +910,11 @@ if(locateBtn) {
           closest = loc;
         }
       });
-      document.getElementById("countrySelect").value = closest.timezone;
+      const sel = document.getElementById("countrySelect");
+      if(sel) {
+        sel.value = closest.timezone;
+        if(typeof updateStateDropdown === 'function') updateStateDropdown();
+      }
       getInfo();
     }, () => {
       locateBtn.textContent = '📍 Location Denied';
@@ -893,7 +971,7 @@ function renderFavoritesDashboard() {
       <article class="country-card" style="min-height: auto;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
           <span class="country-flag" aria-hidden="true" style="font-size: 1.5rem;">${location.flag}</span>
-          <button onclick="document.getElementById('countrySelect').value='${location.timezone}'; getInfo(); window.scrollTo({top:0, behavior:'smooth'});" style="min-height: 30px; font-size: 0.8rem; padding: 0 10px;">View</button>
+          <button onclick="const sel=document.getElementById('countrySelect'); if(sel){sel.value='${location.timezone}'; if(typeof updateStateDropdown==='function')updateStateDropdown(); getInfo(); window.scrollTo({top:0, behavior:'smooth'});}" style="min-height: 30px; font-size: 0.8rem; padding: 0 10px;">View</button>
         </div>
         <div>
           <h3 style="margin: 10px 0 0; font-size: 1.1rem;">${location.city}</h3>
