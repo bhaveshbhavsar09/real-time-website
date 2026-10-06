@@ -444,11 +444,11 @@ async function getInfo() {
     const infoBox = document.getElementById('infoBox');
     if (infoBox) {
         if (current.is_day === 0) {
-            infoBox.style.backgroundColor = 'var(--panel)';
+            infoBox.style.backgroundColor = 'rgba(15, 23, 26, 0.2)';
             infoBox.style.color = 'var(--ink)';
             infoBox.style.borderLeftColor = 'var(--muted)';
         } else {
-            infoBox.style.backgroundColor = 'var(--mint)';
+            infoBox.style.backgroundColor = 'rgba(215, 238, 228, 0.4)';
             infoBox.style.color = '';
             infoBox.style.borderLeftColor = 'var(--coral)';
         }
